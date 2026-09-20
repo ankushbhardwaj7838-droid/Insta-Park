@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Insta-Park — Park Smart. Park Instantly.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#101B3D;
+    --navy-2:#182A57;
+    --blue:#2F6FED;
+    --blue-dim:#e8eefd;
+    --amber:#FFB100;
+    --bg:#F5F6F8;
+    --surface:#FFFFFF;
+    --text:#16192A;
+    --muted:#6B7280;
+    --green:#1C9A5B;
+    --green-dim:#e7f7ef;
+    --red:#E5484D;
+    --red-dim:#fdeceb;
+    --border:#E7E9EE;
+    --radius:14px;
+    box-sizing:border-box;
+  }
+  *{box-sizing:inherit;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4,.disp{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.01em;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;text-decoration:none;}
+  img,svg{display:block;}
+  ::selection{background:var(--amber);color:var(--navy);}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+  .hide{display:none !important;}
+  .scrollx{overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;}
+  .scrollx::-webkit-scrollbar{display:none;}
+
+  /* ---------- App frame ---------- */
+  #app{min-height:100%;padding-bottom:78px;}
+  header.topbar{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px);}
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;}
+  .brand .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--blue),#5b8cff);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .navlinks{display:flex;align-items:center;gap:26px;font-size:14.5px;font-weight:500;color:#c7cee6;}
+  .navlinks a:hover{color:#fff;}
+  .btn{border:none;border-radius:10px;padding:11px 18px;font-weight:600;font-size:14.5px;transition:transform .12s ease,filter .12s ease;}
+  .btn:active{transform:scale(.97);}
+  .btn-amber{background:var(--amber);color:var(--navy);}
+  .btn-amber:hover{filter:brightness(1.05);}
+  .btn-blue{background:var(--blue);color:#fff;}
+  .btn-blue:hover{filter:brightness(1.08);}
+  .btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--muted);}
+  .btn-block{width:100%;display:block;text-align:center;}
+  .btn-lg{padding:15px 20px;font-size:15.5px;border-radius:12px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:600;}
+  .pill-green{background:var(--green-dim);color:var(--green);}
+  .pill-amber{background:#FFF4DB;color:#8a5a00;}
+  .pill-red{background:var(--red-dim);color:var(--red);}
+  .pill-blue{background:var(--blue-dim);color:var(--blue);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+  .muted{color:var(--muted);}
+  .icon{width:17px;height:17px;flex:none;}
+
+  /* bottom mobile nav */
+  nav.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom,0px);}
+  nav.bottomnav button{flex:1;background:none;border:none;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-weight:600;}
+  nav.bottomnav button.active{color:var(--blue);}
+  @media(min-width:860px){nav.bottomnav{display:none;} #app{padding-bottom:0;}}
+  @media(max-width:859px){.navlinks{display:none;}}
+
+  /* ---------- HOME ---------- */
+  .hero{background:var(--navy);color:#fff;position:relative;overflow:hidden;padding:52px 0 90px;}
+  .hero::after{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(47,111,237,.35),transparent 70%);}
+  .hero h1{font-size:clamp(30px,5vw,46px);line-height:1.08;margin:0 0 14px;max-width:620px;}
+  .hero p{color:#b9c1de;font-size:16.5px;max-width:480px;margin:0 0 30px;}
+  .searchbox{background:#fff;border-radius:16px;padding:8px;display:flex;gap:8px;max-width:560px;position:relative;z-index:2;box-shadow:0 20px 40px -14px rgba(0,0,0,.5);}
+  .searchbox input{flex:1;border:none;outline:none;padding:12px 14px;font-size:15px;border-radius:10px;color:var(--text);font-family:inherit;}
+  .chips{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;position:relative;z-index:2;}
+  .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#dbe1f5;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:500;}
+  .chip:hover{background:rgba(255,255,255,.16);}
+
+  .section{padding:52px 0;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;}
+  .section-head h2{font-size:24px;margin:0;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;position:relative;margin-top:-52px;z-index:3;}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;margin-top:-30px;}}
+  .step{background:#fff;border-radius:16px;padding:22px;box-shadow:0 12px 30px -18px rgba(16,27,61,.35);}
+  .step .num{width:34px;height:34px;border-radius:10px;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Space Grotesk';margin-bottom:12px;}
+  .step h3{margin:0 0 6px;font-size:16.5px;}
+  .step p{margin:0;color:var(--muted);font-size:14px;}
+
+  .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:900px){.grid-cards{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.grid-cards{grid-template-columns:1fr 1fr;}}
+  .area-card{padding:16px;cursor:pointer;transition:border-color .15s;}
+  .area-card:hover{border-color:var(--blue);}
+  .area-card .thumb{height:66px;border-radius:10px;background:linear-gradient(135deg,#eef2ff,#dfe8ff);display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:22px;}
+  .area-card h4{margin:0 0 3px;font-size:14.5px;}
+  .area-card span{font-size:12.5px;color:var(--muted);}
+
+  .promo-banner{background:linear-gradient(120deg,var(--navy),var(--navy-2));border-radius:20px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:20px;color:#fff;flex-wrap:wrap;}
+  .promo-banner h3{margin:0 0 8px;font-size:22px;}
+  .promo-banner p{margin:0;color:#b9c1de;max-width:420px;font-size:14.5px;}
+
+  /* ---------- SEARCH / RESULTS ---------- */
+  .search-header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:30;padding:12px 0;}
+  .search-header .row{display:flex;gap:10px;align-items:center;}
+  .search-header input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14.5px;outline:none;font-family:inherit;}
+  .search-header input:focus{border-color:var(--blue);}
+  .filter-bar{display:flex;gap:8px;margin-top:10px;}
+  .filter-chip{border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;flex:none;}
+  .filter-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .viewtoggle{display:none;gap:6px;background:var(--bg);border-radius:10px;padding:4px;}
+  .viewtoggle button{border:none;background:none;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);}
+  .viewtoggle button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  @media(max-width:859px){.viewtoggle{display:flex;}}
+
+  .search-body{display:grid;grid-template-columns:420px 1fr;gap:0;height:calc(100vh - 128px);min-height:520px;}
+  @media(max-width:859px){.search-body{display:block;height:auto;}}
+  .list-col{overflow-y:auto;padding:16px 20px;border-right:1px solid var(--border);}
+  .map-col{position:relative;background:
+      linear-gradient(0deg,rgba(47,111,237,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(47,111,237,.05) 1px,transparent 1px);
+    background-size:34px 34px;background-color:#EAF0FE;overflow:hidden;
+  }
+  @media(max-width:859px){.map-col{height:340px;} .list-col{border-right:none;padding:14px 20px;}}
+  .map-note{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+  .pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;text-align:center;}
+  .pin .tag{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;white-space:nowrap;box-shadow:0 6px 14px -6px rgba(0,0,0,.4);}
+  .pin::after{content:"";display:block;width:0;height:0;margin:0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--navy);}
+  .pin.sel .tag{background:var(--amber);color:var(--navy);}
+  .pin.sel::after{border-top-color:var(--amber);}
+  .pin.full .tag{background:#8a8f9c;}
+  .pin.full::after{border-top-color:#8a8f9c;}
+
+  .pcard{padding:14px;margin-bottom:12px;cursor:pointer;display:flex;gap:12px;transition:border-color .15s,transform .1s;}
+  .pcard:hover{border-color:var(--blue);}
+  .pcard.sel{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
+  .pcard .thumb{width:74px;height:74px;border-radius:10px;flex:none;background:linear-gradient(135deg,#dfe8ff,#c9d8ff);display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .pcard .body{flex:1;min-width:0;}
+  .pcard .top{display:flex;justify-content:space-between;gap:8px;}
+  .pcard h4{margin:0;font-size:15px;}
+  .pcard .price{font-weight:700;font-family:'Space Grotesk';white-space:nowrap;}
+  .pcard .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px;font-size:12.5px;color:var(--muted);align-items:center;}
+  .amenity-row{display:flex;gap:6px;margin-top:8px;}
+  .amenity-row .ic{width:24px;height:24px;border-radius:6px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .empty-state{padding:60px 20px;text-align:center;color:var(--muted);}
+  .empty-state .em{font-size:38px;margin-bottom:10px;}
+
+  /* ---------- DETAILS ---------- */
+  .detail-header{position:sticky;top:64px;background:#fff;border-bottom:1px solid var(--border);z-index:20;padding:12px 0;display:flex;align-items:center;gap:12px;}
+  .backbtn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+  .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;height:280px;border-radius:16px;overflow:hidden;margin:18px 0;}
+  .gallery > div{grid-row:span 2;}
+  .gallery > div:nth-child(2),.gallery>div:nth-child(3){grid-row:span 1;}
+  .gph{background:linear-gradient(135deg,#dfe8ff,#c9d8ff);display:flex;align-items:center;justify-content:center;font-size:30px;color:#8ba3e8;}
+  @media(max-width:700px){.gallery{grid-template-columns:1fr 1fr;height:200px;}}
+  .detail-grid{display:grid;grid-template-columns:1fr 340px;gap:30px;align-items:start;padding-bottom:110px;}
+  @media(max-width:900px){.detail-grid{grid-template-columns:1fr;}}
+  .inv-bar{display:flex;height:12px;border-radius:8px;overflow:hidden;margin:10px 0 8px;}
+  .inv-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);}
+  .inv-legend .dot{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:5px;}
+  .amgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+  @media(max-width:520px){.amgrid{grid-template-columns:repeat(2,1fr);}}
+  .amitem{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:9px 10px;border:1px solid var(--border);border-radius:10px;}
+  .accord{border-top:1px solid var(--border);}
+  .accord summary{padding:14px 2px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  .accord summary::-webkit-details-marker{display:none;}
+  .accord p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.6;}
+  .review{padding:14px 0;border-top:1px solid var(--border);}
+  .review .rh{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;}
+  .stars{color:var(--amber);font-size:13px;}
+  .sticky-cta{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:35;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .sticky-cta .p{font-family:'Space Grotesk';font-weight:700;font-size:19px;}
+  .sticky-cta .p span{font-size:12.5px;font-weight:500;color:var(--muted);display:block;font-family:'Inter';}
+
+  /* ---------- BOOKING ---------- */
+  .bk-shell{max-width:640px;margin:0 auto;padding-bottom:130px;}
+  .stepper{display:flex;align-items:center;margin:22px 0 8px;}
+  .stepper .sdot{width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;flex:none;}
+  .stepper .sdot.on{background:var(--blue);color:#fff;}
+  .stepper .sdot.done{background:var(--green);color:#fff;}
+  .stepper .sline{flex:1;height:2px;background:var(--border);margin:0 6px;}
+  .stepper .sline.on{background:var(--blue);}
+  .bk-card{padding:22px;margin-bottom:16px;}
+  .bk-card h3{margin:0 0 16px;font-size:17px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:12.5px;font-weight:600;color:var(--muted);}
+  .field input,.field select{border:1.5px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14.5px;font-family:inherit;outline:none;}
+  .field input:focus,.field select:focus{border-color:var(--blue);}
+  .duration-ctl{display:flex;align-items:center;gap:14px;justify-content:center;border:1.5px solid var(--border);border-radius:12px;padding:14px;}
+  .duration-ctl button{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:18px;font-weight:700;}
+  .duration-ctl .val{font-family:'Space Grotesk';font-size:20px;font-weight:700;min-width:110px;text-align:center;}
+  .vcard{display:flex;align-items:center;gap:12px;border:1.5px solid var(--border);border-radius:12px;padding:13px;margin-bottom:10px;}
+  .vcard.sel{border-color:var(--blue);background:var(--blue-dim);}
+  .vcard .vic{width:38px;height:38px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
+  .radio-dot{width:19px;height:19px;border-radius:50%;border:2px solid var(--border);flex:none;position:relative;}
+  .vcard.sel .radio-dot{border-color:var(--blue);}
+  .vcard.sel .radio-dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue);}
+  .price-row{display:flex;justify-content:space-between;font-size:14.5px;padding:7px 0;}
+  .price-row.total{border-top:1px solid var(--border);margin-top:6px;padding-top:12px;font-weight:700;font-size:16.5px;font-family:'Space Grotesk';}
+  .pay-opt{display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:9px;font-weight:600;font-size:14px;}
+  .pay-opt.sel{border-color:var(--blue);background:var(--blue-dim);}
+
+  /* ---------- CONFIRMATION / ACTIVE ---------- */
+  .confirm-shell{max-width:460px;margin:0 auto;padding:30px 20px 60px;text-align:center;}
+  .checkmark{width:64px;height:64px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:30px;color:var(--green);animation:pop .5s cubic-bezier(.26,1.4,.5,1);}
+  @keyframes pop{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+  @media (prefers-reduced-motion: reduce){.checkmark{animation:none;}}
+  #qrcanvas{margin:18px auto;border-radius:14px;border:8px solid #fff;box-shadow:0 8px 26px -10px rgba(16,27,61,.3);}
+  .otp-box{display:inline-flex;gap:8px;margin:6px 0 18px;}
+  .otp-box span{width:34px;height:40px;border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+  .conf-detail{text-align:left;padding:16px;margin:18px 0;}
+  .conf-detail .r{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-top:1px solid var(--border);}
+  .conf-detail .r:first-child{border-top:none;}
+  .conf-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .conf-actions .full{grid-column:span 2;}
+
+  .active-badge{position:fixed;bottom:78px;left:16px;right:16px;background:var(--navy);color:#fff;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:38;box-shadow:0 14px 30px -14px rgba(0,0,0,.4);}
+  @media(min-width:860px){.active-badge{bottom:16px;max-width:420px;left:20px;right:auto;}}
+  .active-badge .dotlive{width:9px;height:9px;border-radius:50%;background:var(--amber);animation:blink 1.4s infinite;flex:none;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  @media (prefers-reduced-motion: reduce){.active-badge .dotlive{animation:none;}}
+  .timer-big{font-family:'Space Grotesk';font-size:52px;font-weight:700;letter-spacing:.02em;}
+  .active-shell{max-width:460px;margin:0 auto;padding:36px 20px 100px;text-align:center;}
+
+  /* ---------- generic role screens ---------- */
+  .role-shell{max-width:1100px;margin:0 auto;padding:30px 20px 60px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 30px;}
+  @media(max-width:760px){.stat-grid{grid-template-columns:1fr 1fr;}}
+  .stat-card{padding:18px;}
+  .stat-card .sv{font-family:'Space Grotesk';font-size:26px;font-weight:700;}
+  .stat-card .sl{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  .demo-note{display:inline-flex;align-items:center;gap:7px;background:#FFF4DB;color:#8a5a00;padding:8px 13px;border-radius:10px;font-size:12.5px;font-weight:600;margin-bottom:18px;}
+  table.simple{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.simple th{text-align:left;color:var(--muted);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--border);font-size:12px;}
+  table.simple td{padding:11px 10px;border-bottom:1px solid var(--border);}
+  .scanbtn{padding:30px;text-align:center;font-weight:700;font-size:16px;border-radius:16px;}
+  .scanbtn .ic{font-size:30px;margin-bottom:10px;}
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:60;box-shadow:0 14px 30px -12px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+  footer{background:var(--navy);color:#9aa4c4;padding:40px 0 30px;margin-top:20px;font-size:13.5px;}
+  footer .cols{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand" onclick="go('home')" style="cursor:pointer">
+        <div class="mark">🅿️</div> Insta-Park
+      </div>
+      <nav class="navlinks">
+        <a onclick="go('search')">Find Parking</a>
+        <a onclick="go('home',true)">How it works</a>
+        <a onclick="go('partner')">List your Parking</a>
+        <a onclick="go('admin')" style="opacity:.6">Admin</a>
+        <a onclick="go('attendant')" style="opacity:.6">Attendant</a>
+      </nav>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" onclick="toast('Demo login — no account needed to explore')">Log in</button>
+        <button class="btn btn-amber" onclick="go('partner')" style="display:none" id="listBtnTop">List Parking</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="view"></main>
+
+  <nav class="bottomnav" id="bottomnav">
+    <button data-v="home" onclick="go('home')">🏠<span>Home</span></button>
+    <button data-v="search" onclick="go('search')">🔍<span>Explore</span></button>
+    <button data-v="bookings" onclick="go('bookings')">🎫<span>Bookings</span></button>
+    <button data-v="saved" onclick="go('saved')">❤️<span>Saved</span></button>
+    <button data-v="profile" onclick="go('profile')">👤<span>Profile</span></button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============ DEMO DATA (clearly labelled) ============ */
+const PARKINGS = [
+  {id:'p1', name:'Sector 18 Premium Parking', sector:'Sector 18', top:34, left:52, price:50, distance:'0.3 km', walk:'4 min', rating:4.6, reviews:212, total:30, available:11, reserved:6, occupied:12, covered:true, cctv:true, security:true, ev:true, open24:true, carwash:true, monthly:1800, address:'Near DLF Mall, Sector 18, Noida', hours:'Open 24 hours', entry:'Enter from Gate 2, opposite the mall main entrance. Show QR to the attendant.', cancel:'Free cancellation up to 30 minutes before arrival. Late cancellation charged ₹20.', rules:'No overnight parking without prior approval. Two-wheelers park in the marked bay only.',
+    revs:[{n:'Ankit S.',s:5,t:'Super easy entry, found it right on the map.'},{n:'Priya M.',s:4,t:'Bit crowded on weekends but staff is helpful.'}]},
+  {id:'p2', name:'Botanical Garden Metro Parking', sector:'Botanical Garden', top:58, left:28, price:40, distance:'0.6 km', walk:'8 min', rating:4.3, reviews:158, total:60, available:22, reserved:14, occupied:24, covered:false, cctv:true, security:true, ev:false, open24:true, carwash:false, monthly:1200, address:'Metro Station Complex, Botanical Garden, Noida', hours:'5:00 AM – 11:30 PM', entry:'Open-air lot behind the metro station, follow the parking signage from Exit 2.', cancel:'Free cancellation up to 1 hour before arrival.', rules:'Vehicles left beyond metro hours attract additional overnight charges.',
+    revs:[{n:'Rahul K.',s:4,t:'Great for catching the metro, a short walk in.'}]},
+  {id:'p3', name:'Sector 62 Tech Park Parking', sector:'Sector 62', top:18, left:70, price:45, distance:'1.1 km', walk:'13 min', rating:4.5, reviews:97, total:80, available:6, reserved:20, occupied:54, covered:true, cctv:true, security:true, ev:true, open24:false, carwash:true, monthly:2200, address:'Tower B Basement, Sector 62, Noida', hours:'7:00 AM – 10:00 PM', entry:'Basement entry via ramp near the main gate; attendant will scan on arrival.', cancel:'Free cancellation up to 30 minutes before arrival.', rules:'Visitor passes must match the booked vehicle number exactly.',
+    revs:[{n:'Neha G.',s:5,t:'EV charging saved my evening, will book again.'},{n:'Vikram T.',s:4,t:'Slightly far from the main tower but secure.'}]},
+  {id:'p4', name:'Sector 63 Community Parking', sector:'Sector 63', top:72, left:66, price:40, distance:'1.4 km', walk:'17 min', rating:4.1, reviews:64, total:40, available:0, reserved:10, occupied:30, covered:false, cctv:false, security:true, ev:false, open24:true, carwash:false, monthly:900, address:'Near Community Centre, Sector 63, Noida', hours:'Open 24 hours', entry:'Self check-in — scan the QR at the entry board when you arrive.', cancel:'Free cancellation up to 15 minutes before arrival.', rules:'Unattended lot after 10 PM, keep valuables out of sight.',
+    revs:[{n:'Simran K.',s:4,t:'Affordable and close to the market.'}]},
+  {id:'p5', name:'Noida Electronic City Hub', sector:'Noida Electronic City', top:44, left:14, price:60, distance:'2.0 km', walk:'—', rating:4.7, reviews:301, total:100, available:38, reserved:22, occupied:40, covered:true, cctv:true, security:true, ev:true, open24:true, carwash:true, monthly:2500, address:'Plot 12, Electronic City, Noida', hours:'Open 24 hours', entry:'Multi-level structure, take Ramp A for cars, Bay 3 for bikes.', cancel:'Free cancellation up to 30 minutes before arrival.', rules:'Height restriction 2.1m on Level 3 and above.',
+    revs:[{n:'Devansh R.',s:5,t:'Best organised parking I have used in Noida.'},{n:'Alok P.',s:5,t:'Valet made a work event so much easier.'}]},
+];
+const MIN_PRICE = 40; // platform-wide floor — no parking price is ever shown below this
+PARKINGS.forEach(p=>{ p.price = Math.max(MIN_PRICE, p.price); });
+const AMENITY_ICON = {covered:'🏠',cctv:'📹',security:'💂',ev:'🔌',open24:'🕐',carwash:'🚿'};
+const AMENITY_LABEL = {covered:'Covered parking',cctv:'CCTV',security:'Security guard',ev:'EV charging',open24:'24/7 access',carwash:'Car wash'};
+
+let VEHICLES = [
+  {id:'v1', label:'My Creta', reg:'UP16 AB 1234', type:'Car'},
+  {id:'v2', label:'Activa', reg:'UP16 CD 5678', type:'Bike'},
+];
+let BOOKINGS = []; // completed/confirmed demo bookings
+
+/* ============ STATE ============ */
+const S = {
+  view:'home',
+  query:'',
+  filters:new Set(),
+  sort:'nearest',
+  mapView: window.innerWidth<860 ? 'list' : 'both',
+  selectedId:null,
+  detailId:null,
+  draft:{date:'', time:'', duration:2, vehicleId:'v1', pay:'upi'},
+  activeBooking:null,
+  timerHandle:null,
+};
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function go(view, scrollTo){
+  if(view==='bookings'||view==='saved'||view==='profile'){ toast('Demo prototype — this section is coming soon'); syncBottomNav(); return; }
+  S.view=view;
+  render();
+  window.scrollTo({top:0,behavior:'auto'});
+  if(scrollTo){ setTimeout(()=>{ const el=document.getElementById('how'); if(el) el.scrollIntoView({behavior:'smooth'}); },30); }
+  syncBottomNav();
+}
+function syncBottomNav(){
+  document.querySelectorAll('#bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.v===S.view));
+}
+
+/* ============ RENDER ROUTER ============ */
+function render(){
+  const el = document.getElementById('view');
+  if(S.timerHandle && S.view!=='active'){ clearInterval(S.timerHandle); S.timerHandle=null; }
+  document.getElementById('listBtnTop').style.display = S.view==='home' ? 'inline-block':'none';
+  if(S.view==='home') el.innerHTML = renderHome();
+  else if(S.view==='search') el.innerHTML = renderSearch();
+  else if(S.view==='details') el.innerHTML = renderDetails();
+  else if(S.view==='booking') el.innerHTML = renderBooking();
+  else if(S.view==='confirmation') el.innerHTML = renderConfirmation();
+  else if(S.view==='active') el.innerHTML = renderActive();
+  else if(S.view==='partner') el.innerHTML = renderPartner();
+  else if(S.view==='admin') el.innerHTML = renderAdmin();
+  else if(S.view==='attendant') el.innerHTML = renderAttendant();
+  afterRender();
+}
+
+/* ============ HOME ============ */
+function renderHome(){
+  return `
+  <section class="hero">
+    <div class="wrap">
+      <h1>Parking sorted<br>before you arrive.</h1>
+      <p>Find and reserve verified parking spaces across Noida — pay in advance, walk straight in.</p>
+      <div class="searchbox">
+        <input id="homeSearch" placeholder="Where do you want to park?" value="${S.query}">
+        <button class="btn btn-blue" onclick="submitHomeSearch()">Find Parking</button>
+      </div>
+      <div class="chips">
+        ${['Sector 18','Sector 62','Sector 63','Botanical Garden','Noida Electronic City'].map(c=>`<button class="chip" onclick="quickSearch('${c}')">${c}</button>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="steps" id="how">
+      <div class="step"><div class="num">1</div><h3>Search</h3><p>Enter your destination and see verified parking nearby on the map.</p></div>
+      <div class="step"><div class="num">2</div><h3>Reserve</h3><p>Pick your slot, choose a vehicle and pay — your space is held for you.</p></div>
+      <div class="step"><div class="num">3</div><h3>Park</h3><p>Navigate there and enter with a QR code or backup OTP. No queues.</p></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>Popular parking areas</h2><a onclick="go('search')" class="muted" style="font-size:14px;font-weight:600;cursor:pointer">See all →</a></div>
+      <div class="grid-cards">
+        ${PARKINGS.map(p=>`
+          <div class="area-card card" onclick="quickSearch('${p.sector}')">
+            <div class="thumb">🅿️</div>
+            <h4>${p.sector}</h4>
+            <span>From ₹${p.price}/hr</span>
+          </div>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head"><h2>Parking near you</h2><span class="pill pill-amber">DEMO DATA</span></div>
+      <div class="grid-cards" style="grid-template-columns:repeat(3,1fr)">
+        ${PARKINGS.slice(0,3).map(p=>pcardMini(p)).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="promo-banner">
+        <div>
+          <h3>Turn your unused parking space into income</h3>
+          <p>List your plot, office lot or commercial space on Insta-Park and start earning from every booking.</p>
+        </div>
+        <button class="btn btn-amber btn-lg" onclick="go('partner')">List your Parking</button>
+      </div>
+    </div>
+  </section>
+
+  ${footerHtml()}
+  `;
+}
+function pcardMini(p){
+  return `<div class="area-card card" onclick="openDetails('${p.id}')" style="cursor:pointer">
+    <div class="thumb" style="height:90px;font-size:26px">🅿️</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <h4>${p.name}</h4>
+    </div>
+    <span>${p.distance} away • ⭐ ${p.rating}</span>
+    <div style="margin-top:6px;font-weight:700;font-family:'Space Grotesk'">₹${p.price}<span class="muted" style="font-weight:500;font-family:'Inter';font-size:12px">/hr</span></div>
+  </div>`;
+}
+function submitHomeSearch(){
+  S.query = document.getElementById('homeSearch').value;
+  go('search');
+}
+function quickSearch(q){ S.query=q; go('search'); }
+
+/* ============ SEARCH ============ */
+const FILTER_KEYS=['covered','cctv','ev','open24','carwash','security'];
+function filteredParkings(){
+  let list = PARKINGS.filter(p=>{
+    if(S.query && !(p.sector.toLowerCase().includes(S.query.toLowerCase()) || p.name.toLowerCase().includes(S.query.toLowerCase()))) return false;
+    for(const f of S.filters){ if(!p[f]) return false; }
+    return true;
+  });
+  if(S.sort==='price') list=[...list].sort((a,b)=>a.price-b.price);
+  else if(S.sort==='rating') list=[...list].sort((a,b)=>b.rating-a.rating);
+  else if(S.sort==='available') list=[...list].sort((a,b)=>b.available-a.available);
+  return list;
+}
+function renderSearch(){
+  const list = filteredParkings();
+  return `
+  <div class="search-header">
+    <div class="wrap">
+      <div class="row">
+        <input id="searchInput" placeholder="Where do you want to park?" value="${S.query}" oninput="onSearchInput(this.value)">
+        <select onchange="S.sort=this.value; render()" style="border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13.5px;font-family:inherit">
+          <option value="nearest" ${S.sort==='nearest'?'selected':''}>Nearest</option>
+          <option value="price" ${S.sort==='price'?'selected':''}>Lowest price</option>
+          <option value="rating" ${S.sort==='rating'?'selected':''}>Highest rated</option>
+          <option value="available" ${S.sort==='available'?'selected':''}>Most available</option>
+        </select>
+        <div class="viewtoggle">
+          <button class="${S.mapView==='list'?'active':''}" onclick="S.mapView='list'; render()">List</button>
+          <button class="${S.mapView==='map'?'active':''}" onclick="S.mapView='map'; render()">Map</button>
+        </div>
+      </div>
+      <div class="filter-bar scrollx">
+        ${FILTER_KEYS.map(f=>`<button class="filter-chip ${S.filters.has(f)?'active':''}" onclick="toggleFilter('${f}')">${AMENITY_ICON[f]} ${AMENITY_LABEL[f]}</button>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="search-body">
+    <div class="list-col" style="${S.mapView==='map'?'display:none':''}">
+      <div class="muted" style="font-size:13px;margin-bottom:10px">${list.length} parking spaces found ${S.query? 'near "'+S.query+'"':''}</div>
+      ${list.length? list.map(p=>pcardFull(p)).join('') : `<div class="empty-state"><div class="em">🅿️</div><b>No parking available for this search.</b><p class="muted">Try a nearby area, a different time, or widen your walking radius.</p></div>`}
+    </div>
+    <div class="map-col" style="${S.mapView==='list'?'display:none':''}">
+      <div class="map-note">MAP · DEMO DATA</div>
+      ${list.map(p=>`
+        <div class="pin ${S.selectedId===p.id?'sel':''} ${p.available===0?'full':''}" style="top:${p.top}%;left:${p.left}%" onclick="selectPin('${p.id}')">
+          <div class="tag">${p.available===0?'Full':'₹'+p.price+'/hr'}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+  `;
+}
+function onSearchInput(v){ S.query=v; renderKeepFocus(); }
+function renderKeepFocus(){
+  render();
+  const i=document.getElementById('searchInput'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
+}
+function toggleFilter(f){ S.filters.has(f)?S.filters.delete(f):S.filters.add(f); render(); }
+function selectPin(id){ S.selectedId=id; render(); document.getElementById('card-'+id)?.scrollIntoView({behavior:'smooth',block:'center'}); }
+function pcardFull(p){
+  return `<div id="card-${p.id}" class="pcard card ${S.selectedId===p.id?'sel':''}" onclick="openDetails('${p.id}')">
+    <div class="thumb">🅿️</div>
+    <div class="body">
+      <div class="top"><h4>${p.name}</h4><div class="price">₹${p.price}<span class="muted" style="font-size:11px;font-weight:500">/hr</span></div></div>
+      <div class="meta">
+        <span>📍 ${p.distance}</span><span>⭐ ${p.rating} (${p.reviews})</span>
+        ${p.available>0 ? `<span class="pill pill-green">${p.available} available</span>` : `<span class="pill pill-red">Full</span>`}
+      </div>
+      <div class="amenity-row">
+        ${FILTER_KEYS.filter(f=>p[f]).slice(0,5).map(f=>`<div class="ic" title="${AMENITY_LABEL[f]}">${AMENITY_ICON[f]}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============ DETAILS ============ */
+function openDetails(id){ S.detailId=id; go('details'); }
+function renderDetails(){
+  const p = PARKINGS.find(x=>x.id===S.detailId) || PARKINGS[0];
+  const pctR = Math.round(p.reserved/p.total*100), pctO=Math.round(p.occupied/p.total*100), pctA=100-pctR-pctO;
+  return `
+  <div class="detail-header"><div class="wrap" style="display:flex;align-items:center;gap:12px">
+    <button class="backbtn" onclick="go('search')">←</button>
+    <div style="font-weight:700">${p.name}</div>
+  </div></div>
+  <div class="wrap">
+    <div class="gallery">
+      <div class="gph">🅿️</div><div class="gph">🚗</div><div class="gph">📹</div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <h2 style="margin:0 0 4px">${p.name}</h2>
+        <div class="muted" style="font-size:14px;margin-bottom:10px">⭐ ${p.rating} · ${p.reviews} reviews · ${p.address}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+          <span class="pill pill-blue">${p.distance} away</span>
+          <span class="pill pill-blue">🚶 ${p.walk} walk</span>
+          <span class="pill pill-green">${p.hours}</span>
+        </div>
+
+        <div class="card" style="padding:18px;margin-bottom:18px">
+          <h3 style="margin:0 0 4px;font-size:15.5px">Live availability <span class="pill pill-amber" style="margin-left:6px">DEMO DATA</span></h3>
+          <div class="inv-bar">
+            <div style="width:${pctA}%;background:var(--green)"></div>
+            <div style="width:${pctR}%;background:var(--amber)"></div>
+            <div style="width:${pctO}%;background:#c7ccd6"></div>
+          </div>
+          <div class="inv-legend">
+            <span><i class="dot" style="background:var(--green)"></i>Available (${p.available})</span>
+            <span><i class="dot" style="background:var(--amber)"></i>Reserved (${p.reserved})</span>
+            <span><i class="dot" style="background:#c7ccd6"></i>Occupied (${p.occupied})</span>
+            <span>Total ${p.total}</span>
+          </div>
+        </div>
+
+        <h3 style="font-size:15.5px;margin-bottom:2px">Amenities</h3>
+        <div class="amgrid">
+          ${FILTER_KEYS.filter(f=>p[f]).map(f=>`<div class="amitem">${AMENITY_ICON[f]} ${AMENITY_LABEL[f]}</div>`).join('')}
+        </div>
+
+        <details class="accord"><summary>Parking rules <span>＋</span></summary><p>${p.rules}</p></details>
+        <details class="accord"><summary>Entry instructions <span>＋</span></summary><p>${p.entry}</p></details>
+        <details class="accord"><summary>Cancellation policy <span>＋</span></summary><p>${p.cancel}</p></details>
+
+        <h3 style="font-size:15.5px;margin:18px 0 0">Reviews</h3>
+        ${p.revs.map(r=>`<div class="review"><div class="rh"><span>${r.n}</span><span class="stars">${'★'.repeat(r.s)}${'☆'.repeat(5-r.s)}</span></div><p class="muted" style="margin:5px 0 0;font-size:13.5px">${r.t}</p></div>`).join('')}
+      </div>
+
+      <div class="card" style="padding:18px;position:sticky;top:120px">
+        <div style="font-weight:700;font-family:'Space Grotesk';font-size:22px">₹${p.price}<span class="muted" style="font-size:13px;font-weight:500;font-family:'Inter'">/hour</span></div>
+        <div class="muted" style="font-size:13px;margin-bottom:14px">Monthly plan from ₹${p.monthly}/mo</div>
+        <button class="btn btn-blue btn-block btn-lg" onclick="startBooking('${p.id}')">Reserve Parking</button>
+        <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Free cancellation available</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sticky-cta" style="display:none" id="mobileSticky">
+    <div class="p">₹${p.price}<span>per hour</span></div>
+    <button class="btn btn-blue btn-lg" onclick="startBooking('${p.id}')" style="flex:1">Reserve Parking</button>
+  </div>
+  `;
+}
+
+/* ============ BOOKING ============ */
+let bkStep = 1;
+function startBooking(id){ S.detailId=id; bkStep=1; S.draft.duration=2; go('booking'); }
+function renderBooking(){
+  const p = PARKINGS.find(x=>x.id===S.detailId);
+  const base = p.price*S.draft.duration;
+  const fee=5, discount = bkStep>=3?10:0, taxes=Math.round((base+fee-discount)*0.0); // taxes as applicable = 0 demo
+  const total = base+fee-discount+taxes;
+  return `
+  <div class="wrap bk-shell">
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+      <button class="backbtn" onclick="bkStep>1?(bkStep--,render()):go('details')">←</button>
+      <h2 style="margin:0;font-size:19px">${p.name}</h2>
+    </div>
+
+    <div class="stepper">
+      ${[1,2,3].map((n,i)=>`
+        <div class="sdot ${bkStep===n?'on':bkStep>n?'done':''}">${bkStep>n?'✓':n}</div>
+        ${i<2?`<div class="sline ${bkStep>n?'on':''}"></div>`:''}
+      `).join('')}
+    </div>
+
+    ${bkStep===1?`
+    <div class="bk-card card">
+      <h3>Choose date & time</h3>
+      <div class="field-row">
+        <div class="field"><label>Date</label><input type="date" id="bDate" value="${S.draft.date}"></div>
+        <div class="field"><label>Arrival time</label><input type="time" id="bTime" value="${S.draft.time}"></div>
+      </div>
+      <label style="font-size:12.5px;font-weight:600;color:var(--muted)">Expected duration</label>
+      <div class="duration-ctl" style="margin-top:6px">
+        <button onclick="changeDuration(-0.5)">−</button>
+        <div class="val">${S.draft.duration} hr${S.draft.duration!==1?'s':''}</div>
+        <button onclick="changeDuration(0.5)">+</button>
+      </div>
+    </div>
+    <button class="btn btn-blue btn-block btn-lg" onclick="nextStep1()">Continue</button>
+    `:''}
+
+    ${bkStep===2?`
+    <div class="bk-card card">
+      <h3>Select vehicle</h3>
+      ${VEHICLES.map(v=>`
+        <div class="vcard ${S.draft.vehicleId===v.id?'sel':''}" onclick="S.draft.vehicleId='${v.id}'; render()">
+          <div class="radio-dot"></div>
+          <div class="vic">${v.type==='Car'?'🚗':'🛵'}</div>
+          <div style="flex:1"><div style="font-weight:600">${v.label}</div><div class="muted" style="font-size:12.5px">${v.reg}</div></div>
+        </div>`).join('')}
+      <button class="btn btn-ghost" style="margin-top:4px;font-size:13.5px;font-weight:700;color:var(--blue)" onclick="addVehiclePrompt()">+ Add a new vehicle</button>
+    </div>
+    <button class="btn btn-blue btn-block btn-lg" onclick="bkStep=3; render()">Continue</button>
+    `:''}
+
+    ${bkStep===3?`
+    <div class="bk-card card">
+      <h3>Price breakdown</h3>
+      <div class="price-row"><span>Parking (${S.draft.duration} hr × ₹${p.price})</span><span>₹${base}</span></div>
+      <div class="price-row"><span>Platform fee</span><span>₹${fee}</span></div>
+      <div class="price-row"><span>Discount</span><span style="color:var(--green)">−₹${discount}</span></div>
+      <div class="price-row"><span>Taxes</span><span>₹${taxes}</span></div>
+      <div class="price-row total"><span>Total</span><span>₹${total}</span></div>
+    </div>
+    <div class="bk-card card">
+      <h3>Payment method</h3>
+      <div class="pay-opt ${S.draft.pay==='upi'?'sel':''}" onclick="S.draft.pay='upi'; render()">📱 UPI</div>
+      <div class="pay-opt ${S.draft.pay==='card'?'sel':''}" onclick="S.draft.pay='card'; render()">💳 Credit / Debit Card</div>
+      <div class="pay-opt ${S.draft.pay==='netbanking'?'sel':''}" onclick="S.draft.pay='netbanking'; render()">🏦 Net banking</div>
+    </div>
+    <button class="btn btn-amber btn-block btn-lg" onclick="confirmPayment()">Pay ₹${total}</button>
+    `:''}
+  </div>
+  `;
+}
+function changeDuration(d){ S.draft.duration = Math.max(0.5, +(S.draft.duration+d).toFixed(1)); render(); }
+function nextStep1(){
+  S.draft.date = document.getElementById('bDate').value;
+  S.draft.time = document.getElementById('bTime').value;
+  if(!S.draft.date||!S.draft.time){ toast('Please choose a date and arrival time'); return; }
+  bkStep=2; render();
+}
+function addVehiclePrompt(){
+  const reg = prompt('Vehicle registration number (e.g. UP16 XY 9999)');
+  if(!reg) return;
+  const label = prompt('Nickname for this vehicle (e.g. My Swift)') || 'My Vehicle';
+  const id='v'+(VEHICLES.length+1);
+  VEHICLES.push({id,label,reg,type:'Car'});
+  S.draft.vehicleId=id;
+  render();
+}
+function confirmPayment(){
+  const p = PARKINGS.find(x=>x.id===S.detailId);
+  const bookingId = 'IP' + Math.floor(10000+Math.random()*89999);
+  const otp = String(Math.floor(1000+Math.random()*8999));
+  const vehicle = VEHICLES.find(v=>v.id===S.draft.vehicleId);
+  S.activeBooking = {
+    id:bookingId, otp, parking:p, vehicle,
+    date:S.draft.date, time:S.draft.time, duration:S.draft.duration,
+    status:'CONFIRMED', enteredAt:null
+  };
+  BOOKINGS.unshift(S.activeBooking);
+  go('confirmation');
+}
+
+/* ============ CONFIRMATION ============ */
+function renderConfirmation(){
+  const b = S.activeBooking;
+  if(!b) return renderHome();
+  return `
+  <div class="wrap confirm-shell">
+    <div class="checkmark">✓</div>
+    <h2 style="margin:0 0 4px">Parking confirmed</h2>
+    <p class="muted" style="margin:0 0 10px">Show this QR code or the entry code at the gate.</p>
+    <canvas id="qrcanvas" width="180" height="180"></canvas>
+    <div class="otp-box">${b.otp.split('').map(d=>`<span>${d}</span>`).join('')}</div>
+    <div class="card conf-detail">
+      <div class="r"><span class="muted">Parking</span><span style="font-weight:600">${b.parking.name}</span></div>
+      <div class="r"><span class="muted">Vehicle</span><span style="font-weight:600">${b.vehicle.reg}</span></div>
+      <div class="r"><span class="muted">Arrival</span><span style="font-weight:600">${b.date} · ${b.time}</span></div>
+      <div class="r"><span class="muted">Duration</span><span style="font-weight:600">${b.duration} hr</span></div>
+      <div class="r"><span class="muted">Booking ID</span><span style="font-weight:600">${b.id}</span></div>
+    </div>
+    <div class="conf-actions">
+      <button class="btn btn-blue" onclick="toast('Opening directions to '+ '${b.parking.name}')">Navigate</button>
+      <button class="btn btn-outline" style="color:var(--text);border-color:var(--border)" onclick="startActive()">Simulate entry (QR scan)</button>
+      <button class="btn btn-ghost full" style="color:var(--red);font-weight:700" onclick="cancelBooking()">Cancel booking</button>
+      <button class="btn btn-ghost full" onclick="toast('Support ticket flow — see Help & Support')">Get help</button>
+    </div>
+  </div>`;
+}
+function drawQR(bookingId){
+  const c = document.getElementById('qrcanvas'); if(!c) return;
+  const ctx = c.getContext('2d');
+  const n=18, cell=180/n;
+  // deterministic pseudo-random from bookingId
+  let seed=0; for(const ch of bookingId) seed = (seed*31+ch.charCodeAt(0))>>>0;
+  function rnd(){ seed=(seed*1103515245+12345)>>>0; return (seed>>>8)/16777216; }
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,180,180);
+  ctx.fillStyle='#101B3D';
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ if(rnd()>0.56) ctx.fillRect(x*cell,y*cell,cell-1,cell-1); }
+  // finder squares
+  function finder(px,py){ ctx.fillStyle='#101B3D'; ctx.fillRect(px,py,cell*4,cell*4); ctx.fillStyle='#fff'; ctx.fillRect(px+cell,py+cell,cell*2,cell*2); ctx.fillStyle='#101B3D'; ctx.fillRect(px+cell*1.6,py+cell*1.6,cell*0.8,cell*0.8);}
+  finder(2,2); finder(180-cell*4-2,2); finder(2,180-cell*4-2);
+}
+function cancelBooking(){
+  if(!confirm('Cancel this booking? Free cancellation applies as per policy.')) return;
+  if(S.activeBooking){ S.activeBooking.status='CANCELLED'; }
+  toast('Booking cancelled — refund initiated');
+  go('home');
+}
+
+/* ============ ACTIVE PARKING ============ */
+function startActive(){
+  if(!S.activeBooking) return;
+  S.activeBooking.status='ACTIVE';
+  S.activeBooking.enteredAt = Date.now();
+  go('active');
+}
+function renderActive(){
+  const b = S.activeBooking;
+  if(!b || b.status!=='ACTIVE') return renderHome();
+  return `
+  <div class="wrap active-shell">
+    <span class="pill pill-green">PARKING ACTIVE</span>
+    <h2 style="margin:14px 0 2px">${b.parking.name}</h2>
+    <p class="muted" style="margin:0 0 20px">${b.vehicle.reg} · Booking ${b.id}</p>
+    <div class="timer-big" id="liveTimer">00:00:00</div>
+    <p class="muted" style="margin-top:6px">Time elapsed · booked for ${b.duration} hr</p>
+    <div class="conf-actions" style="margin-top:24px">
+      <button class="btn btn-blue" onclick="extendParking()">＋ Extend</button>
+      <button class="btn btn-outline" style="color:var(--text);border-color:var(--border)" onclick="toast('Opening directions back to your vehicle')">Get directions</button>
+      <button class="btn btn-amber full" onclick="completeExit()">Simulate exit (Scan QR)</button>
+      <button class="btn btn-ghost full" style="color:var(--red);font-weight:700" onclick="toast('Urgent issue reported — support will call you shortly')">Report urgent issue</button>
+    </div>
+  </div>`;
+}
+function afterRenderActiveTimer(){
+  const b=S.activeBooking; if(!b||b.status!=='ACTIVE') return;
+  const el=document.getElementById('liveTimer'); if(!el) return;
+  function tick(){
+    const secs = Math.floor((Date.now()-b.enteredAt)/1000);
+    const h=String(Math.floor(secs/3600)).padStart(2,'0');
+    const m=String(Math.floor(secs%3600/60)).padStart(2,'0');
+    const s=String(secs%60).padStart(2,'0');
+    if(el) el.textContent = `${h}:${m}:${s}`;
+  }
+  tick();
+  S.timerHandle = setInterval(tick,1000);
+}
+function extendParking(){
+  S.activeBooking.duration = +(S.activeBooking.duration+0.5).toFixed(1);
+  toast('Extended by 30 minutes — ₹'+Math.round(S.activeBooking.parking.price/2)+' charged');
+  render();
+}
+function completeExit(){
+  S.activeBooking.status='COMPLETED';
+  toast('Exit approved — thanks for parking with Insta-Park!');
+  const b=S.activeBooking;
+  go('home');
+}
+
+/* ============ PARTNER (light preview) ============ */
+function renderPartner(){
+  return `
+  <div class="wrap role-shell">
+    <div class="demo-note">🅿️ Partner preview · demo data</div>
+    <h2 style="margin:0 0 4px">Partner dashboard</h2>
+    <p class="muted" style="margin:0 0 10px">Sector 18 Premium Parking</p>
+    <div class="stat-grid">
+      <div class="stat-card card"><div class="sv">18</div><div class="sl">Today's bookings</div></div>
+      <div class="stat-card card"><div class="sv">12</div><div class="sl">Active vehicles</div></div>
+      <div class="stat-card card"><div class="sv">11</div><div class="sl">Available spaces</div></div>
+      <div class="stat-card card"><div class="sv">₹4,260</div><div class="sl">Today's revenue</div></div>
+    </div>
+    <div class="card" style="padding:18px;margin-bottom:20px">
+      <h3 style="margin:0 0 12px;font-size:15.5px">Recent bookings</h3>
+      <table class="simple">
+        <tr><th>Booking</th><th>Vehicle</th><th>Time</th><th>Amount</th><th>Status</th></tr>
+        <tr><td>IP38221</td><td>UP16 AB 1234</td><td>2:00 PM – 4:00 PM</td><td>₹80</td><td><span class="pill pill-green">Active</span></td></tr>
+        <tr><td>IP38214</td><td>DL8C AX 9021</td><td>11:00 AM – 1:00 PM</td><td>₹60</td><td><span class="pill pill-blue">Completed</span></td></tr>
+        <tr><td>IP38199</td><td>UP16 ZT 4432</td><td>9:30 AM – 10:30 AM</td><td>₹30</td><td><span class="pill pill-blue">Completed</span></td></tr>
+      </table>
+    </div>
+    <div class="promo-banner">
+      <div><h3>Want to list a new space?</h3><p>Add photos, set your pricing and get approved by the Insta-Park team.</p></div>
+      <button class="btn btn-amber btn-lg" onclick="toast('Listing wizard — demo prototype')">Add a listing</button>
+    </div>
+  </div>`;
+}
+
+/* ============ ADMIN (light preview) ============ */
+function renderAdmin(){
+  return `
+  <div class="wrap role-shell">
+    <div class="demo-note">🅿️ Admin preview · demo data</div>
+    <h2 style="margin:0 0 16px">Platform overview</h2>
+    <div class="stat-grid">
+      <div class="stat-card card"><div class="sv">5</div><div class="sl">Active parking locations</div></div>
+      <div class="stat-card card"><div class="sv">310</div><div class="sl">Total spaces</div></div>
+      <div class="stat-card card"><div class="sv">77</div><div class="sl">Available now</div></div>
+      <div class="stat-card card"><div class="sv">₹1.2L</div><div class="sl">Platform revenue (MTD)</div></div>
+    </div>
+    <div class="card" style="padding:18px;margin-bottom:20px">
+      <h3 style="margin:0 0 12px;font-size:15.5px">Pending partner approvals</h3>
+      <table class="simple">
+        <tr><th>Listing</th><th>Sector</th><th>Spaces</th><th>Action</th></tr>
+        <tr><td>Green Valley Apartments Lot</td><td>Sector 50</td><td>24</td><td><button class="btn btn-blue" style="padding:6px 12px;font-size:12.5px" onclick="toast('Listing approved')">Approve</button></td></tr>
+        <tr><td>Cyber Hub Basement</td><td>Sector 78</td><td>60</td><td><button class="btn btn-blue" style="padding:6px 12px;font-size:12.5px" onclick="toast('Listing approved')">Approve</button></td></tr>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* ============ ATTENDANT (light preview) ============ */
+function renderAttendant(){
+  return `
+  <div class="wrap role-shell" style="max-width:480px">
+    <div class="demo-note">🅿️ Attendant preview · demo data</div>
+    <h2 style="margin:0 0 16px">Sector 18 Premium Parking</h2>
+    <div class="scanbtn card btn-blue" style="color:#fff;margin-bottom:12px" onclick="attendantScan('entry')"><div class="ic">📷</div>SCAN ENTRY</div>
+    <div class="scanbtn card" style="border:1.5px solid var(--border);margin-bottom:12px" onclick="attendantScan('exit')"><div class="ic">🚪</div>SCAN EXIT</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="card" style="padding:16px;text-align:center;font-weight:700" onclick="toast('12 vehicles currently parked')">Active vehicles<br><span class="muted" style="font-weight:500;font-size:12.5px">Tap to view</span></div>
+      <div class="card" style="padding:16px;text-align:center;font-weight:700" onclick="toast('Search by Booking ID, phone or vehicle number')">Search booking<br><span class="muted" style="font-weight:500;font-size:12.5px">Tap to search</span></div>
+    </div>
+  </div>`;
+}
+function attendantScan(kind){
+  if(kind==='entry') toast('Booking IP38221 verified ✓ — vehicle matched, parking started');
+  else toast('Exit approved ✓ — ₹80 fully paid, space now available');
+}
+
+/* ============ FOOTER ============ */
+function footerHtml(){
+  return `<footer><div class="wrap cols">
+    <div><div style="color:#fff;font-weight:700;margin-bottom:8px">Insta-Park</div>Park Smart. Park Instantly.<br>Noida · Delhi NCR</div>
+    <div>Product<br><a onclick="go('search')">Find Parking</a><br><a onclick="go('partner')">List your Parking</a></div>
+    <div>Company<br>Help & Support<br>Terms · Privacy</div>
+  </div></footer>`;
+}
+
+/* ============ misc after-render hooks ============ */
+function afterRender(){
+  if(S.view==='confirmation' && S.activeBooking) drawQR(S.activeBooking.id);
+  if(S.view==='active') afterRenderActiveTimer();
+  syncBottomNav();
+  // sticky mobile CTA on details
+  if(S.view==='details'){
+    const s=document.getElementById('mobileSticky');
+    if(s && window.innerWidth<860) s.style.display='flex';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
